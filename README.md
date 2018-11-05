@@ -5,6 +5,7 @@
 - it holds an array of structs (size is hardcoded to 20 currently) stored in kernal memory where each struct represents a encryption/decryption character driver.
 - the main control driver has ioctl functions that add/remove/ect 
 - right now just remove and add functionality is working.
+- user app is interface.c
 - code is really messy atm and super error prone so might crash vm
 
 ## How to setup

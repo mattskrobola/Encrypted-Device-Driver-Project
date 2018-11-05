@@ -10,17 +10,11 @@
 
 ## How to setup
 - make
-- sudo insmod cryptctl.ko (this loads the module)
-- sudo mknod -m 666 /dev/cryptctl c 240 0 (puts cryptctl in /dev we can put this in the makefile later)
-- gcc interface.c -o interface
 
 - ./interface create -key-
 - ./interface delete -index-
 
-- once done testing or need to make changes make sure u run 
-  - rm /dev/cryptctl
-  - sudo rmmod cryptctl
-  - then repeat everything
+- once done testing or need to make changes make sure u run -> make clean 
 
 - run cat /proc/devices to see if cryptctrl mapped to the right major number
 - you can check if the character drivers are in /dev after creating/deleting

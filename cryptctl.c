@@ -132,8 +132,6 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
     int temp;
     char nameE[15];
     char nameD[15];
-    char *buffer;
-    char *curKey;
     // used to hold input from user app if passing more than 1 arg
     struct dataTransfer *tempDT = kzalloc(sizeof(struct dataTransfer), GFP_KERNEL);
     rc = 0;

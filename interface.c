@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "cryptctl.h"
 
 /*
@@ -50,6 +51,76 @@ int ioctl_getkey(int fd, int index, char *key) {
     
 }
 
+// encryption and decryption character devices
+
+//encrypts input given a key and input.
+void encryptString(char *key, char *input, char *buffer){
+    int messageLength, keyLen, j, i, currLetter;
+    char currKey;
+    messageLength = strlen(input);
+    keyLen = strlen(key);
+    i = 0;
+    j = 0;
+    for(; i < messageLength; ++i, ++j){
+    if(j == keyLen){
+          j = 0;
+    }
+    if ((key[i] >= 'A') && (key[i]<=  'Z')){
+           currKey = (key[i] -  'A');
+    }
+    if ((key[i] >= 'a') && (key[i] <= 'z')){
+           currKey = (key[i] - 'a');
+    }
+    currLetter = input[i] + currKey;
+    if (isupper(input[i]) && (currLetter > 'Z')){
+      currLetter = (currLetter - 26);
+    }
+    if(islower(input[i]) && (currLetter > 'z')){
+      currLetter = (currLetter - 26);
+    }
+
+    buffer[i] = currLetter;
+
+    }
+    buffer[messageLength] = '\0';
+    return;
+}
+
+//decrypts given encrypted input given a key.
+void decryptString(char *key, char *encryptedInput, char *buffer){
+    int messageLength, keyLen, j, i, currLetter;
+    char currKey;
+    messageLength = strlen(encryptedInput);
+    keyLen = strlen(key);
+    i = 0;
+    j = 0;
+    for(; i < messageLength; ++i, ++j){
+    if(j == keyLen){
+          j = 0;
+    }
+    
+    if ((key[i] >= 'A') && (key[i]<=  'Z')){
+           currKey = (key[i] -  'A');
+    }
+    if ((key[i] >= 'a') && (key[i] <= 'z')){
+           currKey = (key[i] - 'a');
+    }
+
+    currLetter = encryptedInput[i] - currKey + 26;
+    if (isupper(encryptedInput[i]) && (currLetter > 'Z')){
+      currLetter = (currLetter - 26);
+    }
+    //printf("%d\n", currLetter);
+    if(islower(encryptedInput[i]) && (currLetter > 'z')){
+      currLetter = (currLetter - 26);
+    }
+    buffer[i] = currLetter;
+
+    }
+    buffer[messageLength] = '\0';
+    return;
+}
+
 //TODO cmd input
 int main(int arg, char* argv[]){
 
@@ -84,3 +155,4 @@ int main(int arg, char* argv[]){
     close(fd); 
     return 0;  
 }
+

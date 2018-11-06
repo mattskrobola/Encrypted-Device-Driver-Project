@@ -74,15 +74,17 @@ void encryptString(char *key, char *input, char *buffer){
     keyLen = strlen(key);
     i = 0;
     j = 0;
+	
     for(; i < messageLength; ++i, ++j){
+	
     if(j == keyLen){
           j = 0;
     }
-    if ((key[i] >= 'A') && (key[i]<=  'Z')){
-           currKey = (key[i] -  'A');
+    if ((key[j] >= 'A') && (key[j]<=  'Z')){
+           currKey = (key[j] -  'A');
     }
-    if ((key[i] >= 'a') && (key[i] <= 'z')){
-           currKey = (key[i] - 'a');
+    if ((key[j] >= 'a') && (key[j] <= 'z')){
+           currKey = (key[j] - 'a');
     }
     currLetter = input[i] + currKey;
     if (isupper(input[i]) && (currLetter > 'Z')){
@@ -112,11 +114,11 @@ void decryptString(char *key, char *encryptedInput, char *buffer){
           j = 0;
     }
     
-    if ((key[i] >= 'A') && (key[i]<=  'Z')){
-           currKey = (key[i] -  'A');
+    if ((key[j] >= 'A') && (key[j]<=  'Z')){
+           currKey = (key[j] -  'A');
     }
-    if ((key[i] >= 'a') && (key[i] <= 'z')){
-           currKey = (key[i] - 'a');
+    if ((key[j] >= 'a') && (key[j] <= 'z')){
+           currKey = (key[j] - 'a');
     }
 
     currLetter = encryptedInput[i] - currKey + 26;
@@ -161,7 +163,7 @@ int main(int arg, char* argv[]){
     } else if (strcmp(argv[1], "delete") == 0 && arg == 3){
         index = atoi(argv[2]);
         ioctl_delete(fd,index); 
-    } else if(strcmp(argv[1], "encrypt") == 0 && arg <= 3){
+    } else if(strcmp(argv[1], "encrypt") == 0 && arg >= 3){
         index = atoi(argv[2]);
         ioctl_getkey(fd, index, &getkey[0]);
         input = argv[3];
@@ -173,7 +175,7 @@ int main(int arg, char* argv[]){
         key[strlen(key)] = '\0';
         index = atoi(argv[3]);
         ioctl_changekey(fd, index, key);
-    } else if(strcmp(argv[1], "decrypt") == 0 && arg <= 3){
+    } else if(strcmp(argv[1], "decrypt") == 0 && arg >= 3){
         index = atoi(argv[2]);
         ioctl_getkey(fd, index, &getkey[0]);
         input = argv[3];

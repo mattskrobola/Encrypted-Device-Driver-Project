@@ -151,18 +151,18 @@ int main(int arg, char* argv[]){
         printf("Can't open device file\n");
         return -1;
     }
-    if(strcmp(argv[1], "create") == 0){
+    if(strcmp(argv[1], "create") == 0 && arg == 3){
         key = argv[2];
         ioctl_create(fd,key);
-    } else if (strcmp(argv[1], "delete") == 0){
+    } else if (strcmp(argv[1], "delete") == 0 && arg == 3){
         index = atoi(argv[2]);
         ioctl_delete(fd,index); 
-    } else if(strcmp(argv[1], "encrypt") == 0){
+    } else if(strcmp(argv[1], "encrypt") == 0 && arg <= 3){
         index = atoi(argv[2]);
         char getkey[50];
         ioctl_getkey(fd, index, &getkey[0]);
         printf("key: %s", getkey);
-    } else if(strcmp(argv[1], "encrypt") == 0){
+    } else if(strcmp(argv[1], "change_key") == 0 && arg == 4){
         index = atoi(argv[2]);
         key = argv[3];
         key[strlen(key)] = '\0';

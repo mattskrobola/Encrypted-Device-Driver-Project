@@ -139,8 +139,11 @@ int main(int arg, char* argv[]){
 
     int fd;
     int rc;
-    char *key = "hey\n";
+    char *key;
+    char *input;
     int index;
+    char getkey[50]; // holds the fetched key
+    char buffer[200]; // holds the result can change size if needed
 
     
     if(arg < 2){
@@ -159,17 +162,25 @@ int main(int arg, char* argv[]){
         index = atoi(argv[2]);
         ioctl_delete(fd,index); 
     } else if(strcmp(argv[1], "encrypt") == 0 && arg <= 3){
-        
+        index = atoi(argv[2]);
+        ioctl_getkey(fd, index, &getkey[0]);
+        input = argv[3];
+        encryptString(&getkey[0], input, &buffer[0]);
+        printf("encryped result: %s\n", buffer);
+
     } else if(strcmp(argv[1], "change_key") == 0 && arg == 4){
         key = argv[2];
         key[strlen(key)] = '\0';
         index = atoi(argv[3]);
         ioctl_changekey(fd, index, key);
     } else if(strcmp(argv[1], "decrypt") == 0 && arg <= 3){
-        
+        index = atoi(argv[2]);
+        ioctl_getkey(fd, index, &getkey[0]);
+        input = argv[3];
+        decryptString(&getkey[0], input, &buffer[0]);
+        printf("decryped result: %s\n", buffer);
     } else if(strcmp(argv[1], "getkey") == 0 && arg == 3){
         index = atoi(argv[2]);
-        char getkey[50];
         ioctl_getkey(fd, index, &getkey[0]);
     } else {
 	printf("wrong combination of arugments\n");

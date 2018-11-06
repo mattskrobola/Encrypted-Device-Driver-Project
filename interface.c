@@ -54,7 +54,7 @@ int ioctl_getkey(int fd, int index, char *key) {
 int ioctl_change(int fd, int index, char *key) {
     struct dataTransfer dt = {key , index};
     int rc;
-    rc = ioctl(fd, IOCTL_GETKEY, &dt);
+    rc = ioctl(fd, IOCTL_CHANGEKEY, &dt);
     if (rc < 0) {
         printf ("index doesn't exist\n");
         return rc;
@@ -163,10 +163,9 @@ int main(int arg, char* argv[]){
         ioctl_getkey(fd, index, &getkey[0]);
         printf("key: %s", getkey);
     } else if(strcmp(argv[1], "change_key") == 0 && arg == 4){
-        index = atoi(argv[2]);
-        key = argv[3];
+        key = argv[2];
         key[strlen(key)] = '\0';
-
+        index = atoi(argv[3]);
         ioctl_getkey(fd, index, key);
         printf("key: %s", key );
     }

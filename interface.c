@@ -46,12 +46,12 @@ int ioctl_getkey(int fd, int index, char *key) {
         printf ("Index does not exist\n");
         return rc;
     }
-    printf("key returned is %s", dt.key);
+    printf("current key for pair %d is %s\n", index, dt.key);
     return 0;
     
 }
 
-int ioctl_change(int fd, int index, char *key) {
+int ioctl_changekey(int fd, int index, char *key) {
     struct dataTransfer dt = {key , index};
     int rc;
     rc = ioctl(fd, IOCTL_CHANGEKEY, &dt);
@@ -59,6 +59,7 @@ int ioctl_change(int fd, int index, char *key) {
         printf ("index doesn't exist\n");
         return rc;
     }
+    printf("key for cryptEncrypt%d and cryptDecrypt%d changed to: %s\n", index, index, key);
     return 0;
     
 }
@@ -158,16 +159,20 @@ int main(int arg, char* argv[]){
         index = atoi(argv[2]);
         ioctl_delete(fd,index); 
     } else if(strcmp(argv[1], "encrypt") == 0 && arg <= 3){
-        index = atoi(argv[2]);
-        char getkey[50];
-        ioctl_getkey(fd, index, &getkey[0]);
-        printf("key: %s", getkey);
+        
     } else if(strcmp(argv[1], "change_key") == 0 && arg == 4){
         key = argv[2];
         key[strlen(key)] = '\0';
         index = atoi(argv[3]);
-        ioctl_getkey(fd, index, key);
-        printf("key: %s", key );
+        ioctl_changekey(fd, index, key);
+    } else if(strcmp(argv[1], "decrypt") == 0 && arg <= 3){
+        
+    } else if(strcmp(argv[1], "getkey") == 0 && arg == 3){
+        index = atoi(argv[2]);
+        char getkey[50];
+        ioctl_getkey(fd, index, &getkey[0]);
+    } else {
+	printf("wrong combination of arugments\n");
     }
 
     close(fd); 

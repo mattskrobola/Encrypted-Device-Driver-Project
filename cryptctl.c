@@ -168,6 +168,7 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 	        nameD[14] = '\0';
 
 	        rc = construct_crypt_pair(&crypt_devices[i], &crypt_devices[i+1], i, crypt_class, key, &nameE[0], &nameD[0]);
+		if(rc == 0)rc = i;
     	}
         break;
     case IOCTL_DELETE:

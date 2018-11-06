@@ -16,7 +16,7 @@
 
 struct crypt_dev {
 	char *key;
-	int open;
+	int open; //0 if not occupied 1 is it is
 	struct cdev cdev;
 };
 MODULE_LICENSE("GPL");
@@ -31,7 +31,6 @@ struct file_operations encryption_fops = {
 
 };
 
-//dont really need these idk why they are here tbh
 ssize_t  crypt_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset){
         printk(KERN_ALERT "inside function: %s\n", __FUNCTION__);
         return 0;
@@ -52,11 +51,17 @@ int crypt_close(struct inode *pinode, struct file *pfile){
         return 0;
 }
 
-
+/*
+	registers cryptEncryptXX and cryptDecryptXX
+	Takes in the struct pointer for both devices, minor number which is the index in the struct array
+	names and key.
+*/
 static int construct_crypt_pair(struct crypt_dev *devE, struct crypt_dev *devD,  int minor, struct class *class, char *key, char *Ename, char *Dname){
 	int rc = 0;
 
 	//encryption device
+
+	//dev_t is used to hold major and minor numbers for registration
 	dev_t devno = MKDEV(crypt_major, minor);
 
 	struct device *device = NULL;
@@ -115,7 +120,9 @@ static void destroy_pair(struct crypt_dev *devE, struct crypt_dev *devD, int min
 
 
 
-//I started the indexes at 10 for easier string formatting
+/*
+	main ioctl function that handles all of the calls from the user application (interface.c)
+*/
 long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args){
 	int rc;
     char *key;
@@ -127,15 +134,12 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
     char nameD[15];
     char *buffer;
     char *curKey;
+    // used to hold input from user app if passing more than 1 arg
     struct dataTransfer *tempDT = kzalloc(sizeof(struct dataTransfer), GFP_KERNEL);
     rc = 0;
     switch (ioctl_num) {
     case IOCTL_CREATE:
-		tempkey = (char *) args;
-		key = kzalloc(strnlen_user(tempkey, 50), GFP_KERNEL);
-		copy_from_user(key, tempkey, strnlen_user(tempkey, 50));
-		key[strlen(key)] = '\0';
-		printk("key is currently %s\n", key);
+    	//first find if we have available space for the device pair
 		i = 0;
         while(i < maxDevices && crypt_devices[i].open != 0){
         	i += 2;
@@ -143,7 +147,14 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
         if(i == maxDevices){
         	rc = -1; // full on devices
         } else {
+        	tempkey = (char *) args;
+        	//allocate the key from user space into kernal memory
+			key = kzalloc(strnlen_user(tempkey, 50), GFP_KERNEL);
+			copy_from_user(key, tempkey, strnlen_user(tempkey, 50));
+			key[strlen(key)] = '\0';
+			printk("key is currently %s\n", key);
 
+			//naming convention for 48 is the ascii code for 0
 	        temp = i;
 	        strcpy(nameE, "cryptEncrypt");
 	        nameE[13] = 48 + (temp % 10);
@@ -152,7 +163,6 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 	        nameE[14] = '\0';
 
 	        temp = i;
-
 	        strcpy(nameD, "cryptDecrypt");
 	        nameD[13] = 48 + (temp % 10);
 	        temp = temp /10;
@@ -170,7 +180,6 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 
     		copy_from_user(tempDT, (void *)args, sizeof(struct dataTransfer));
     		index = tempDT->index;
-
     		if(index >= maxDevices || crypt_devices[index].open != 1){
     			rc = -1;
     		} else {
@@ -195,10 +204,10 @@ struct file_operations  fops = {
 	.release  = crypt_close,
 };
 
-//register device
+//register control device
 int init_module(void) {
 
-	dev_t dev;
+	dev_t dev; //holds major, minor number
 	int rc;
 	dev = 0;
   	rc = register_chrdev(MAJOR_NUM, DEVICE_NAME, &fops);
@@ -208,8 +217,9 @@ int init_module(void) {
     	return rc;
   	}
 
-  	printk ("The major device number is 240.\n");
+  	printk ("The major device number is 240.\n"); //might have to dynamically pick major number
 	
+	//For the number of character device pairs we preallocate the space needed to fit all of them
 	rc = alloc_chrdev_region(&dev, 0, maxDevices, "testName");
 	if (rc < 0) {
 		printk(KERN_WARNING "[target] alloc_chrdev_region() failed\n");
@@ -222,9 +232,8 @@ int init_module(void) {
 	if (IS_ERR(crypt_class)) {
 		return -1;
 	}
-	crypt_devices = (struct crypt_dev *)kzalloc(
-		maxDevices * sizeof(struct crypt_dev), 
-		GFP_KERNEL);
+	// holds all of the character device drivers
+	crypt_devices = (struct crypt_dev *)kzalloc( maxDevices * sizeof(struct crypt_dev), GFP_KERNEL);
   	return 0;
 }
 

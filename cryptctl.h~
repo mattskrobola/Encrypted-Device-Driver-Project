@@ -26,11 +26,25 @@ char* encryptString(char* key, char* input){
     if(j == keyLen){
           j = 0;
     }
-    encryptedMsg[i] = ((input[i] + key[i]) % 26) + 'A';
-    // printf("input letter = %c, digit = %d\n", input[i], input[i]);
-    // printf("key letter = %c, digit = %d\n", key[i], key[i]);
-    // printf("encryptedMsg letter = %c, digit = %d\n", encryptedMsg[i], encryptedMsg[i]);
-    // printf("current digit for j = %d\n", j);
+    char currKey;
+    if ((key[i] >= 'A') && (key[i]<=  'Z')){
+           currKey = (key[i] -  'A');
+    }
+    if ((key[i] >= 'a') && (key[i] <= 'z')){
+           currKey = (key[i] - 'a');
+    }
+    int currLetter = input[i] + currKey;
+    if (isupper(input[i]) && (currLetter > 'Z')){
+      currLetter = (currLetter - 26);
+    }
+    if(islower(input[i]) && (currLetter > 'z')){
+      currLetter = (currLetter - 26);
+    }
+
+
+
+    encryptedMsg[i] = currLetter;
+
  	}
   encryptedMsg[messageLength] = '\0';
 	return encryptedMsg;
@@ -48,7 +62,23 @@ char* decryptString(char* key, char* encryptedInput){
     if(j == keyLen){
           j = 0;
     }
-    decryptedMsg[i] = (((encryptedInput[i] - key[i]) + 26) % 26) + 'A';
+    char currKey;
+    if ((key[i] >= 'A') && (key[i]<=  'Z')){
+           currKey = (key[i] -  'A');
+    }
+    if ((key[i] >= 'a') && (key[i] <= 'z')){
+           currKey = (key[i] - 'a');
+    }
+
+    int currLetter = encryptedInput[i] - currKey + 26;
+    if (isupper(encryptedInput[i]) && (currLetter > 'Z')){
+      currLetter = (currLetter - 26);
+    }
+    //printf("%d\n", currLetter);
+    if(islower(encryptedInput[i]) && (currLetter > 'z')){
+      currLetter = (currLetter - 26);
+    }
+    decryptedMsg[i] = currLetter;
 
  	}
   decryptedMsg[messageLength] = '\0';

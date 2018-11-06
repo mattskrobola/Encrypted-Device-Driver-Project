@@ -2,17 +2,19 @@
 
 ## Overview
 - cryptctl.c acts as the control device driver
-- it holds an array of structs (size is hardcoded to 20 currently) stored in kernal memory where each struct represents a encryption/decryption character driver.
-- the main control driver has ioctl functions that add/remove/ect 
-- right now just remove and add functionality is working.
+- it holds an array of structs stored in kernal memory where each struct represents a encryption/decryption character driver.
+- the main control driver has ioctl functions that add/remove/ect
 - user app is interface.c
-- code is really messy atm and super error prone so might crash vm
 
 ## How to setup
 - make
 
-- ./interface create -key-
-- ./interface delete -index-
+- ./interface create -key
+- ./interface delete -index
+- ./interface encrypt -index -input
+- ./interface decrypt -index -input
+- ./interface change_key -newkey -index
+- ./interface getkey -index
 
 - once done testing or need to make changes make sure u run -> make clean 
 
@@ -22,8 +24,7 @@
 - Major number is hardcoded for the control driver to 240
 
 ## TODO
-- cmd input
-- ioctl calls for encrypt/decrypt change key
-- Vigenère cipher
-- error checks
-- other
+- test
+- allow for multiple words as input for encrypt decrpt
+- report
+- maybe extra credit

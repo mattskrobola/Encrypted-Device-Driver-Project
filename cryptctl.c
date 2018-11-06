@@ -134,6 +134,7 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 		tempkey = (char *) args;
 		key = kzalloc(strnlen_user(tempkey, 50), GFP_KERNEL);
 		copy_from_user(key, tempkey, strnlen_user(tempkey, 50));
+		key[strlen(key)] = '\0';
 		printk("key is currently %s\n", key);
 		i = 0;
         while(i < maxDevices && crypt_devices[i].open != 0){
@@ -174,7 +175,7 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
     			rc = -1;
     		} else {
     			printk("inside getkey key is currently %s\n", crypt_devices[index].key);
-	    		copy_to_user(tempDT->key, crypt_devices[index].key, strlen(crypt_devices[index].key));
+	    		copy_to_user(tempDT->key, crypt_devices[index].key, strlen(crypt_devices[index].key)+1);
 	    		printk("inside getkey return key is: %s\n",tempDT->key);
 			}
     		break;

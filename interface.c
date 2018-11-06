@@ -45,6 +45,7 @@ int ioctl_getkey(int fd, int index, char *key) {
         printf ("ioctl_getkey failed\n");
         return rc;
     }
+    printf("key returned is %s", dt.key);
     return 0;
     
 }

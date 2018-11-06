@@ -12,3 +12,4 @@ struct dataTransfer {
 #define IOCTL_CREATE _IOR(MAJOR_NUM, 0, char *)
 #define IOCTL_DELETE _IOR(MAJOR_NUM, 1, int)
 #define IOCTL_GETKEY _IOR(MAJOR_NUM, 2, void *)
+#define IOCTL_CHANGEKEY _IOR(MAJOR_NUM, 3, void *)

@@ -13,8 +13,8 @@
 int ioctl_create(int fd, char *key) {
     int rc;
     rc = ioctl(fd, IOCTL_CREATE, key);
-    if (rc < 0) {
-        printf ("ioctl_create failed\n");
+    if (rc < -1) {
+        printf ("Not enough space to create device pair\n");
         return -1;
     }
 
@@ -29,7 +29,7 @@ int ioctl_delete(int fd, int index){
     rc = ioctl(fd, IOCTL_DELETE, index);
 
     if (rc < 0) {
-        printf ("ioctl_delete failed");
+        printf ("index doesn't exist");
         return -1;
     }
     printf("removed cryptEncrypt%d and cryptDecrypt%d\n", index, index);
@@ -40,13 +40,25 @@ int ioctl_delete(int fd, int index){
 */
 int ioctl_getkey(int fd, int index, char *key) {
     struct dataTransfer dt = {key , index};
-    long rc;
+    int rc;
     rc = ioctl(fd, IOCTL_GETKEY, &dt);
     if (rc < 0) {
-        printf ("ioctl_getkey failed\n");
+        printf ("Index does not exist\n");
         return rc;
     }
     printf("key returned is %s", dt.key);
+    return 0;
+    
+}
+
+int ioctl_change(int fd, int index, char *key) {
+    struct dataTransfer dt = {key , index};
+    int rc;
+    rc = ioctl(fd, IOCTL_GETKEY, &dt);
+    if (rc < 0) {
+        printf ("index doesn't exist\n");
+        return rc;
+    }
     return 0;
     
 }
@@ -140,7 +152,7 @@ int main(int arg, char* argv[]){
         return -1;
     }
     if(strcmp(argv[1], "create") == 0){
-        char *key = argv[2];
+        key = argv[2];
         ioctl_create(fd,key);
     } else if (strcmp(argv[1], "delete") == 0){
         index = atoi(argv[2]);
@@ -150,9 +162,15 @@ int main(int arg, char* argv[]){
         char getkey[50];
         ioctl_getkey(fd, index, &getkey[0]);
         printf("key: %s", getkey);
+    } else if(strcmp(argv[1], "encrypt") == 0){
+        index = atoi(argv[2]);
+        key = argv[3];
+        key[strlen(key)] = '\0';
+
+        ioctl_getkey(fd, index, key);
+        printf("key: %s", key );
     }
 
     close(fd); 
     return 0;  
 }
-

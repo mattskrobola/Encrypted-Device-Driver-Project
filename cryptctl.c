@@ -142,13 +142,13 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
         while(i < maxDevices && crypt_devices[i].open != 0){
         	i += 2;
         }
-        if(i == maxDevices){
+        if(i >= maxDevices){
         	rc = -1; // full on devices
         } else {
         	tempkey = (char *) args;
         	//allocate the key from user space into kernal memory
-			key = kzalloc(strnlen_user(tempkey, 50), GFP_KERNEL);
-			copy_from_user(key, tempkey, strnlen_user(tempkey, 50));
+			key = kzalloc(strnlen_user(tempkey, 100), GFP_KERNEL);
+			copy_from_user(key, tempkey, strnlen_user(tempkey, 100));
 			key[strlen(key)] = '\0';
 			printk("key is currently %s\n", key);
 
@@ -172,18 +172,40 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
         break;
     case IOCTL_DELETE:
     		index = (int) args;
+    		if(index >= maxDevices || index < 0 || crypt_devices[index].open != 1){
+    			rc = -1;
+    		}
     		destroy_pair(&crypt_devices[index], &crypt_devices[index+1], index, crypt_class);
     		break;
     case IOCTL_GETKEY:
 
     		copy_from_user(tempDT, (void *)args, sizeof(struct dataTransfer));
     		index = tempDT->index;
-    		if(index >= maxDevices || crypt_devices[index].open != 1){
+    		if(index >= maxDevices || index < 0 || crypt_devices[index].open != 1){
     			rc = -1;
     		} else {
-    			printk("inside getkey key is currently %s\n", crypt_devices[index].key);
+    			printk("key for current device is %s\n", crypt_devices[index].key);
 	    		copy_to_user(tempDT->key, crypt_devices[index].key, strlen(crypt_devices[index].key)+1);
-	    		printk("inside getkey return key is: %s\n",tempDT->key);
+	    		printk("key returning is: %s\n",tempDT->key);
+			}
+    		break;
+    case IOCTL_CHANGEKEY:
+
+    		copy_from_user(tempDT, (void *)args, sizeof(struct dataTransfer));
+    		index = tempDT->index;
+    		if(index >= maxDevices || index < 0 || crypt_devices[index].open != 1){
+    			rc = -1;
+    		} else {
+    			printk("old key: %s\n",crypt_devices[index].key);
+    			kfree((&crypt_devices[index])->key);
+    			key = kzalloc(strnlen_user(tempDT->key, 100), GFP_KERNEL);
+				copy_from_user(key, tempDT->key, strnlen_user(tempDT->key, 100));
+
+				(&crypt_devices[index])->key = key;
+				(&crypt_devices[index+1])->key = key;
+
+    			printk("new key %s\n", crypt_devices[index].key);
+	    		
 			}
     		break;
     }
@@ -247,3 +269,4 @@ void cleanup_module(void) {
 	unregister_chrdev_region(MKDEV(crypt_major, 0), maxDevices);
   	unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
 }
+

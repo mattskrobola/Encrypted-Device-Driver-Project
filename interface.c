@@ -29,7 +29,7 @@ int ioctl_delete(int fd, int index){
     rc = ioctl(fd, IOCTL_DELETE, index);
 
     if (rc < 0) {
-        printf ("index doesn't exist \n");
+        printf ("index %d doesn't exist \n", index);
         return -1;
     }
     printf("removed cryptEncrypt%d and cryptDecrypt%d\n", index, index);

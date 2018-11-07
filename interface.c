@@ -76,25 +76,29 @@ void encryptString(char *key, char *input, char *buffer){
     j = 0;
 	
     for(; i < messageLength; ++i, ++j){
-	
-    if(j == keyLen){
-          j = 0;
-    }
-    if ((key[j] >= 'A') && (key[j]<=  'Z')){
-           currKey = (key[j] -  'A');
-    }
-    if ((key[j] >= 'a') && (key[j] <= 'z')){
-           currKey = (key[j] - 'a');
-    }
-    currLetter = input[i] + currKey;
-    if (isupper(input[i]) && (currLetter > 'Z')){
-      currLetter = (currLetter - 26);
-    }
-    if(islower(input[i]) && (currLetter > 'z')){
-      currLetter = (currLetter - 26);
-    }
-
-    buffer[i] = currLetter;
+    	if(input[i] <  65 || input[i] > 122 || input[i] > 90 && input[i] < 97){
+			currLetter = input[i];
+		}
+		else{
+    		if(j == keyLen){
+      	   j = 0;
+    		}	
+    		if ((key[j] >= 'A') && (key[j]<=  'Z')){
+           	currKey = (key[j] -  'A');
+    		}
+    		if ((key[j] >= 'a') && (key[j] <= 'z')){
+           	currKey = (key[j] - 'a');
+    		}
+    		
+    		currLetter = input[i] + currKey;
+    		if (isupper(input[i]) && (currLetter > 'Z')){
+      		currLetter = (currLetter - 26);
+    		}
+    		if(islower(input[i]) && (currLetter > 'z')){
+      		currLetter = (currLetter - 26);
+    		}
+		}
+    	buffer[i] = currLetter;
 
     }
     buffer[messageLength] = '\0';
@@ -110,26 +114,31 @@ void decryptString(char *key, char *encryptedInput, char *buffer){
     i = 0;
     j = 0;
     for(; i < messageLength; ++i, ++j){
-    if(j == keyLen){
-          j = 0;
-    }
+    	if(encryptedInput[i] <  65 || encryptedInput[i] > 122 || encryptedInput[i] > 90 && encryptedInput[i] < 97){
+			currLetter = encryptedInput[i];
+		}
+		else{
+    		if(j == keyLen){
+          	j = 0;
+    		}
     
-    if ((key[j] >= 'A') && (key[j]<=  'Z')){
-           currKey = (key[j] -  'A');
-    }
-    if ((key[j] >= 'a') && (key[j] <= 'z')){
-           currKey = (key[j] - 'a');
-    }
+    		if ((key[j] >= 'A') && (key[j]<=  'Z')){
+           	currKey = (key[j] -  'A');
+    		}
+    		if ((key[j] >= 'a') && (key[j] <= 'z')){
+         	currKey = (key[j] - 'a');
+    		}
 
-    currLetter = encryptedInput[i] - currKey + 26;
-    if (isupper(encryptedInput[i]) && (currLetter > 'Z')){
-      currLetter = (currLetter - 26);
-    }
-    //printf("%d\n", currLetter);
-    if(islower(encryptedInput[i]) && (currLetter > 'z')){
-      currLetter = (currLetter - 26);
-    }
-    buffer[i] = currLetter;
+    		currLetter = encryptedInput[i] - currKey + 26;
+    		if (isupper(encryptedInput[i]) && (currLetter > 'Z')){
+      		currLetter = (currLetter - 26);
+    		}
+    		//printf("%d\n", currLetter);
+    		if(islower(encryptedInput[i]) && (currLetter > 'z')){
+      		currLetter = (currLetter - 26);
+    		}
+    	}
+    		buffer[i] = currLetter;
 
     }
     buffer[messageLength] = '\0';

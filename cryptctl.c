@@ -153,14 +153,14 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 			printk("key is currently %s\n", key);
 
 			//naming convention for 48 is the ascii code for 0
-	        temp = i;
+	        temp = i/2;
 	        strcpy(nameE, "cryptEncrypt");
 	        nameE[13] = 48 + (temp % 10);
 	        temp = temp /10;
 	        nameE[12] = 48 + (temp % 10);
 	        nameE[14] = '\0';
 
-	        temp = i;
+	        temp = i/2;
 	        strcpy(nameD, "cryptDecrypt");
 	        nameD[13] = 48 + (temp % 10);
 	        temp = temp /10;
@@ -168,11 +168,12 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 	        nameD[14] = '\0';
 
 	        rc = construct_crypt_pair(&crypt_devices[i], &crypt_devices[i+1], i, crypt_class, key, &nameE[0], &nameD[0]);
-		if(rc == 0)rc = i;
+		if(rc == 0)rc = i/2;
     	}
         break;
     case IOCTL_DELETE:
     		index = (int) args;
+    		index *= 2;
     		if(index >= maxDevices || index < 0 || crypt_devices[index].open != 1){
     			rc = -1;
     		}
@@ -194,6 +195,7 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
 
     		copy_from_user(tempDT, (void *)args, sizeof(struct dataTransfer));
     		index = tempDT->index;
+    		index *= 2;
     		if(index >= maxDevices || index < 0 || crypt_devices[index].open != 1){
     			rc = -1;
     		} else {
@@ -270,4 +272,5 @@ void cleanup_module(void) {
 	unregister_chrdev_region(MKDEV(crypt_major, 0), maxDevices);
   	unregister_chrdev(MAJOR_NUM, DEVICE_NAME);
 }
+
 

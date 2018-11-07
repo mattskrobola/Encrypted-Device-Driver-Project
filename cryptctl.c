@@ -140,7 +140,7 @@ long crypt_ioctl (struct file *file, unsigned int ioctl_num, unsigned long args)
     	//first find if we have available space for the device pair
 		i = 0;
         while(i < maxDevices && crypt_devices[i].open != 0){
-        	i += 1;
+        	i += 2;
         }
         if(i >= maxDevices){
         	rc = -1; // full on devices

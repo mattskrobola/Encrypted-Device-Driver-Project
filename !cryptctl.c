@@ -19,6 +19,26 @@ struct crypt_dev {
 	int open; //0 if not occupied 1 is it is
 	struct cdev cdev;
 };
+
+struct device * my_dev;
+struct kobject *root, *enc, *dec;
+
+//Create /sys/devices/cryptctl
+my_dev = root_device_register("cryptctl");
+root = my_dev->kobj;
+
+//Create /sys/device/crypticl/
+
+//TODO when finished void root_device_unregister(struct device * my_dev);
+
+struct kobject * ko = my_dev->kobj;
+struct kobject * subdir =
+	kobject_create_and_add(char * name, struct kobject * parent);
+//returns null on error
+//TODO when finished void kobject_put(struct kobject * subdir);
+
+
+
 MODULE_LICENSE("GPL");
 
 static unsigned int crypt_major = 0; // this changes

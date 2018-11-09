@@ -13,7 +13,7 @@
 int ioctl_create(int fd, char *key) {
     int rc;
     rc = ioctl(fd, IOCTL_CREATE, key);
-    if (rc < -1) {
+    if (rc < 0) {
         printf ("Not enough space to create device pair\n");
         return -1;
     }
@@ -43,7 +43,7 @@ int ioctl_getkey(int fd, int index, char *key) {
     int rc;
     rc = ioctl(fd, IOCTL_GETKEY, &dt);
     if (rc < 0) {
-        printf ("Index does not exist\n");
+        printf ("Index %d does not exist\n", index);
         return rc;
     }
     printf("current key for pair %d is %s\n", index, dt.key);
@@ -56,7 +56,7 @@ int ioctl_changekey(int fd, int index, char *key) {
     int rc;
     rc = ioctl(fd, IOCTL_CHANGEKEY, &dt);
     if (rc < 0) {
-        printf ("index doesn't exist\n");
+        printf ("index %d doesn't exist\n", index);
         return rc;
     }
     printf("key for cryptEncrypt%d and cryptDecrypt%d changed to: %s\n", index, index, key);
@@ -78,11 +78,12 @@ void encryptString(char *key, char *input, char *buffer){
     for(; i < messageLength; ++i, ++j){
     	if(input[i] <  65 || input[i] > 122 || input[i] > 90 && input[i] < 97){
 			currLetter = input[i];
+            j--;
 		}
 		else{
     		if(j == keyLen){
-      	   j = 0;
-    		}	
+      	    j = 0;
+    		}
     		if ((key[j] >= 'A') && (key[j]<=  'Z')){
            	currKey = (key[j] -  'A');
     		}
@@ -116,26 +117,25 @@ void decryptString(char *key, char *encryptedInput, char *buffer){
     for(; i < messageLength; ++i, ++j){
     	if(encryptedInput[i] <  65 || encryptedInput[i] > 122 || encryptedInput[i] > 90 && encryptedInput[i] < 97){
 			currLetter = encryptedInput[i];
+            j--;
 		}
 		else{
     		if(j == keyLen){
-          	j = 0;
+                j = 0;
     		}
-    
     		if ((key[j] >= 'A') && (key[j]<=  'Z')){
-           	currKey = (key[j] -  'A');
+           	    currKey = (key[j] -  'A');
     		}
     		if ((key[j] >= 'a') && (key[j] <= 'z')){
-         	currKey = (key[j] - 'a');
+         	    currKey = (key[j] - 'a');
     		}
-
     		currLetter = encryptedInput[i] - currKey + 26;
     		if (isupper(encryptedInput[i]) && (currLetter > 'Z')){
-      		currLetter = (currLetter - 26);
+      	        currLetter = (currLetter - 26);
     		}
     		//printf("%d\n", currLetter);
     		if(islower(encryptedInput[i]) && (currLetter > 'z')){
-      		currLetter = (currLetter - 26);
+      		    currLetter = (currLetter - 26);
     		}
     	}
     		buffer[i] = currLetter;
@@ -147,11 +147,14 @@ void decryptString(char *key, char *encryptedInput, char *buffer){
 
 //TODO cmd input
 int main(int arg, char* argv[]){
-
+    int i;
+    int j;
     int fd;
     int rc;
+    int cur;
+    char *curS;
     char *key;
-    char *input;
+    char input[100];
     int index;
     char getkey[50]; // holds the fetched key
     char buffer[200]; // holds the result can change size if needed
@@ -172,24 +175,44 @@ int main(int arg, char* argv[]){
     } else if (strcmp(argv[1], "delete") == 0 && arg == 3){
         index = atoi(argv[2]);
         ioctl_delete(fd,index); 
-    } else if(strcmp(argv[1], "encrypt") == 0 && arg >= 3){
+    } else if(strcmp(argv[1], "encrypt") == 0 && arg >= 4){
         index = atoi(argv[2]);
-        ioctl_getkey(fd, index, &getkey[0]);
-        input = argv[3];
-        encryptString(&getkey[0], input, &buffer[0]);
-        printf("encryped result: %s\n", buffer);
+        rc = ioctl_getkey(fd, index, &getkey[0]);
+        cur = 0;
+        strcpy(input, "");
+        if(rc > -1){
+            for(i = 3; i < arg; i++){
+                cur += strlen(argv[i]) + 1;
+                strcat(input, argv[i]);
+                strcat(input," ");
+            }
+            cur--;
+            input[cur] = '\0';
+            encryptString(&getkey[0], &input[0], &buffer[0]);
+            printf("encryped result: %s\n", buffer);
+        }
 
     } else if(strcmp(argv[1], "change_key") == 0 && arg == 4){
         key = argv[2];
         key[strlen(key)] = '\0';
         index = atoi(argv[3]);
         ioctl_changekey(fd, index, key);
-    } else if(strcmp(argv[1], "decrypt") == 0 && arg >= 3){
+    } else if(strcmp(argv[1], "decrypt") == 0 && arg >= 4){
         index = atoi(argv[2]);
-        ioctl_getkey(fd, index, &getkey[0]);
-        input = argv[3];
-        decryptString(&getkey[0], input, &buffer[0]);
-        printf("decryped result: %s\n", buffer);
+        rc = ioctl_getkey(fd, index, &getkey[0]);
+        cur = 0;
+        strcpy(input, "");
+        if(rc > -1){
+            for(i = 3; i < arg; i++){
+                cur += strlen(argv[i]) + 1;
+                strcat(input, argv[i]);
+                strcat(input," ");
+            }
+            cur--;
+            input[cur] = '\0';
+            decryptString(&getkey[0], &input[0], &buffer[0]);
+            printf("decryped result: %s\n", buffer);
+        }
     } else if(strcmp(argv[1], "getkey") == 0 && arg == 3){
         index = atoi(argv[2]);
         ioctl_getkey(fd, index, &getkey[0]);
@@ -200,3 +223,4 @@ int main(int arg, char* argv[]){
     close(fd); 
     return 0;  
 }
+
